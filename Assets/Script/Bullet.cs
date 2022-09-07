@@ -8,6 +8,7 @@ public class Bullet : MonoBehaviour
     [SerializeField] private float speed;
     private GameObject _player;
     public bool mirror;
+    //checa para que lado o personagem está
     [SerializeField] private int damage;
     public int origin;
     //0 = player, 1 = enemy
@@ -17,7 +18,6 @@ public class Bullet : MonoBehaviour
         _player = GameObject.FindWithTag("Player");
         if (origin == 0)
         {
-            print("player");
             if (_player.transform.localScale.x >= 0)
             {
                 mirror = false;
@@ -52,23 +52,35 @@ public class Bullet : MonoBehaviour
         }
     }
 
-    private void OnTriggerEnter(Collider other)
+    private void OnTriggerEnter2D(Collider2D other)
     {
-        if (origin == 0)
+        if (origin == 0)//caso origem for o jogador o tiro não acerta ele mesmo
         {
             if (other.tag != "Player")
             {
                 if (other.tag == "Enemy")
                 {
                     EnemyAI enemyColider = other.GetComponent<EnemyAI>();
-                    enemyColider.enemyLife =enemyColider.enemyLife -damage;
-                    enemyColider.onDamage = true;
+                    if (!enemyColider.onDamage)
+                    {
+                        enemyColider.enemyLife =enemyColider.enemyLife -damage;
+                        enemyColider.onDamage = true; 
+                    }
+                    else
+                    {
+                        Physics2D.IgnoreCollision(gameObject.GetComponent<Collider2D>(), other.GetComponent<Collider2D>());
+                    }
                 }
-                Destroy(gameObject);
+
+                if (other.tag != "LimitCamera" && other.tag != "Bullet")//ignora se collider for limite da camera ou outro bullet
+                {
+                    Destroy(gameObject);
+                }
+                
             }
         }
         
-        else if (origin == 1)
+        else if (origin == 1)//caso origem for o jogador o tiro não acerta ele mesmo
         {
             if (other.tag != "Enemy")
             {
@@ -85,7 +97,10 @@ public class Bullet : MonoBehaviour
 
                 else
                 {
-                    Destroy(gameObject);
+                    if (other.tag != "LimitCamera" && other.tag != "Bullet")
+                    {
+                        Destroy(gameObject);
+                    }
                 }
                 
             }

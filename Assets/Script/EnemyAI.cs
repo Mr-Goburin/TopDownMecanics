@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using UnityEngine;
 
@@ -5,15 +6,20 @@ using UnityEngine;
 public class EnemyAI : MonoBehaviour
 {
     [SerializeField] private float speed,delayShoot;
+    //velocidade do inimigo e o tempo de tiro para proximo tiro
     private GameObject _player;
     private Animator _animator;
-    public Transform _enemyaim;
+    [SerializeField]private Transform _enemyaim;
+    //ponto de spawn do tiro
 
     public bool onDamage,onChase,onAttack;
+        // checa quais ação estão ativa
     public int enemyLife;
-    public float distantPlayer,enemyVision,enemyLimitChase,rangeShoot;
+    [SerializeField]private float distantPlayer,enemyVision,enemyLimitChase,rangeShoot;
+    //checa distancia do jogador e limite de persiguição do inimigo
 
     private bool shootReady = true;
+    //evita disparos continuos
 
     [SerializeField]private GameObject _shoot;
     // Start is called before the first frame update
@@ -30,13 +36,12 @@ public class EnemyAI : MonoBehaviour
         Vector3 dir = transform.position - _player.transform.position;
         float angle = Mathf.Atan2(dir.y,dir.x) * Mathf.Rad2Deg;
         _enemyaim.transform.rotation = Quaternion.AngleAxis(angle, Vector3.forward);
-        _animator.SetBool("isWalking",true);
         if (onChase)
         {
             if (distantPlayer > rangeShoot)
             {
                 _animator.SetBool("isWalking",true);
-                transform.position = Vector3.MoveTowards(transform.position, _player.transform.position, speed * Time.deltaTime); 
+                
                 onAttack = false;
             }
             else
@@ -59,14 +64,14 @@ public class EnemyAI : MonoBehaviour
         {
             onChase = false;
         }
-        if (_player.transform.position.x < transform.position.x)
+        if (_player.transform.position.x < transform.position.x)//aponta o inimigo para o lado do jogador
         {
-            gameObject.GetComponent<SpriteRenderer>().flipX = false;
+            gameObject.transform.localScale = new Vector3(1, 1, 1);
         }
 
         else
         {
-            gameObject.GetComponent<SpriteRenderer>().flipX = true;
+            gameObject.transform.localScale = new Vector3(-1, 1, 1);
         }
         if (onDamage)
         {
@@ -90,8 +95,17 @@ public class EnemyAI : MonoBehaviour
             }
         }
     }
-    
-    IEnumerator CallonDamage()
+
+    private void FixedUpdate()
+    {
+        if (onChase && !onAttack)//move o inimigo direção jogador
+        {
+            transform.position =
+                Vector3.MoveTowards(transform.position, _player.transform.position, speed * Time.deltaTime);
+        }
+    }
+
+    IEnumerator CallonDamage()//Ativa o "flash" após sofrer dano
     {
         SpriteRenderer sprite = GetComponent<SpriteRenderer>();
 
@@ -104,7 +118,7 @@ public class EnemyAI : MonoBehaviour
         }
     }
     
-    IEnumerator CallShooting()
+    IEnumerator CallShooting()//Chama o tiro e aguarda proximo
     {
         shootReady = false;
         Shooting();
@@ -112,7 +126,7 @@ public class EnemyAI : MonoBehaviour
         shootReady = true;
     }
 
-    private void Shooting()
+    private void Shooting()//cria o tiro
     {
         GameObject shoot = Instantiate(_shoot, _enemyaim.position, _enemyaim.rotation);
         shoot.GetComponent<Bullet>().origin = 1;

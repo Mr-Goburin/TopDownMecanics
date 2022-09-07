@@ -17,7 +17,7 @@ public class PlayerAim : MonoBehaviour
 
         Vector2 offset = new Vector2(mousePos.x - screenPoint.x, mousePos.y - screenPoint.y);
 
-        if (_player.localScale.x >= 0)
+        if (_player.localScale.x >= 0)//verifica para que lado jogador está olhando e acompanha ele
         {
             angle = Mathf.Atan2(offset.y, offset.x) * Mathf.Rad2Deg;
         }
@@ -25,6 +25,6 @@ public class PlayerAim : MonoBehaviour
         {
             angle = Mathf.Atan2(-offset.y, -offset.x) * Mathf.Rad2Deg;
         }
-        transform.rotation = Quaternion.Euler(0,0,angle);
+        transform.rotation = Quaternion.Euler(0,0,angle);//atualiza informações recebida do mouse
     }
 }
